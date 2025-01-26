@@ -34,14 +34,14 @@ class Player(pygame.sprite.Sprite):
 
 class Button(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, buttonText='Button', onclickFunction=None, but=1, image=None,
-                 colorText: [int, int, int, int] = [255, 255, 255, 10]):
+                 colorText: [int, int, int, int] = [255, 255, 255, 10], image_hover=None):
         pygame.sprite.Sprite.__init__(self)
         if image:
             self.image = pygame.image.load(image)
             self.image = pygame.transform.scale(self.image, [width, height])
-            self.imageNormal = self.image
-        else:
-            self.image = None
+        if image_hover:
+            self.image_hover = pygame.image.load(image_hover)
+            self.image_hover = pygame.transform.scale(self.image_hover, [width, height])
         self.but = but
         self.x = x
         self.y = y
@@ -59,16 +59,15 @@ class Button(pygame.sprite.Sprite):
         self.alreadyPressed = False
 
     def update(self):
-        if self.image:
-            self.image.fill((0, 0, 0),special_flags=pygame.BLEND_RGBA_)
         self.buttonSurface.fill(self.fillColors['normal'])
+        if self.image:
+            screen.blit(self.image, self.buttonRect)
         if self.buttonRect.collidepoint(pygame.mouse.get_pos()):
             self.buttonSurface.fill(self.fillColors['hover'])
-            # self.colorText[-1] -= 100
-            # self.colorText[-1] = 0 if self.colorText[-1] < 0 else self.colorText[-1]
             self.buttonSurf = self.main_front.render(self.buttonText, True, self.colorText)
-            self.image.fill((255, 255, 255, 100), special_flags=pygame.BLEND_RGBA_MULT)
-
+            # self.image.fill((255, 255, 255, 100), special_flags=pygame.BLEND_RGBA_MULT)
+            if self.image_hover:
+                screen.blit(self.image_hover, self.buttonRect)
             if pygame.mouse.get_pressed(num_buttons=3)[0]:
                 self.buttonSurface.fill(self.fillColors['pressed'])
                 if not self.alreadyPressed:
@@ -77,7 +76,6 @@ class Button(pygame.sprite.Sprite):
             else:
                 self.alreadyPressed = False
         if self.image:
-            screen.blit(self.image, self.buttonRect)
             self.textRect = self.buttonSurf.get_rect(center=self.buttonRect.center)
             screen.blit(self.buttonSurf, self.textRect)
         else:
@@ -96,7 +94,7 @@ class Game:
         self.playerGroup = pygame.sprite.Group()
         # self.playerGroup.add(Player(image="goldappl.png", size=[100, 100]))
         self.buttonGroup = pygame.sprite.Group()
-        self.buttonGroup.add(Button(100, 100, 50, 50, image="goldappl.png", onclickFunction=lambda: print("sdfd")))
+        self.buttonGroup.add(Button(100, 100, 50, 50, image="goldappl.png", onclickFunction=lambda: print("sdfd"),image_hover = "i.webp"))
         self.running = True
         self.clock.tick(60)
 
