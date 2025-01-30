@@ -1,0 +1,5 @@
+PLATFORM_HEIGHT = PLATFORM_WIDTH = 32
+WIN_WIDTH = 600  # Ширина создаваемого окна
+WIN_HEIGHT = 600  # Высота
+DISPLAY = (WIN_WIDTH, WIN_HEIGHT)
+fps = 60
