@@ -1,48 +1,114 @@
 import sys
 
-import pygame
+import levels
+from sprites import *
 
 
-class Player(pygame.sprite.Sprite):
-    def __init__(self, image, size):
+def terminate():
+    pygame.quit()
+    sys.exit()
+
+
+class Monster(pygame.sprite.Sprite):
+    def __init__(self, x, y, speed=2, _len=0, image="Slime Sprites.png", colorkey=None):
         pygame.sprite.Sprite.__init__(self)
-        super().__init__()
-        self.image = pygame.image.load(image)
-        self.image = pygame.transform.scale(self.image, size)
-        self.rect = self.image.get_rect()
-        self.pos = [0, 0]
-        self.speed = 1
+        self.animation = cut_sheet(load_image(image, scale=False, colorkey=-1), 4, 3)[0][:2]
+        self.speed = speed
+        self._len = _len
+        self.color = (0, 0, 255)
+        self.rect = pygame.Rect(x, y, PLATFORM_WIDTH, PLATFORM_HEIGHT)
+        self.count = 0
+        self.count2 = 0
+        self.image = self.animation[self.count2]
 
-    def update(self):
-        # self.pos[0] += self.speed
-        # self.pos[1] += self.speed
-        # self.rect.move_ip(self.pos)
-        # if self.rect.left < 0:
-        #     self.speed = -self.speed
-        # if self.rect.right > 500:
-        #     self.speed = self.speed
-        # if self.rect.top < 0:
-        #     self.speed = -self.speed
-        # if self.rect.bottom > 500:
-        #     self.speed = self.speed
-        # # self.rect.move_ip(self.pos)
-        screen.blit(self.image, self.pos)
+    def update(self, screen):
+        self.count2 += 0.25
+        if self.count2 >= len(self.animation):
+            self.count2 = 0
+        self.image = self.animation[int(self.count2)]
+        self.image = self.image.subsurface(self.image.get_bounding_rect())
+        self.image = pygame.transform.scale(self.image, (PLATFORM_WIDTH, PLATFORM_HEIGHT))
+        if self.count >= self._len and self._len > 0:
+            self.count = 0
+            self.speed = -self.speed
+        elif self._len > 0:
+            self.rect.x += self.speed
+            self.count += abs(self.speed)
 
-    def move(self, pos):
-        self.pos = pos
+        if self.speed > 0:
+            screen.blit(self.image, camera.apply(self))
+        else:
+            revers_image = pygame.transform.flip(self.image, True, False)
+            revers_image.set_colorkey(revers_image.get_at((0, 0)))
+            screen.blit(revers_image, camera.apply(self))
+
+
+class Camera(object):
+    def __init__(self, camera_func, width, height):
+        self.camera_func = camera_func
+        self.state = pygame.Rect(0, 0, width, height)
+
+    def apply(self, target):
+        return target.rect.move(self.state.topleft)
+
+    def update(self, target):
+        self.state = self.camera_func(self.state, target.rect)
+
+
+def camera_configure(camera, target_rect):
+    l, t, _, _ = target_rect
+    _, _, w, h = camera
+    l, t = -l + WIN_WIDTH / 2, -t + WIN_HEIGHT / 2
+
+    l = min(0, l)  # Не движемся дальше левой границы
+    l = max(-(camera.width - WIN_WIDTH), l)  # Не движемся дальше правой границы
+    t = max(-(camera.height - WIN_HEIGHT), t)  # Не движемся дальше нижней границы
+    t = min(0, t)  # Не движемся дальше верхней границы
+
+    return pygame.Rect(l, t, w, h)
+
+
+def generate_level(level):
+    x = y = 0
+    for row in level["map"]:
+        for col in row:
+            if col == "W":
+                all_sprites.add(Wall((x, y)))
+            if col == "E":
+                end_rect = EndPoint((x, y))
+                all_sprites.add(end_rect)
+            if col.isdigit():
+                if col in level["monsters"].keys():
+                    m = level["monsters"][col]
+                    monster = Monster(x, y, image=m["image"], _len=m["len"] * PLATFORM_WIDTH, colorkey=-1)
+                    monsters.add(monster)
+            if col == "P":
+                player = Player(x, y)
+                all_sprites.add(player)
+            x += PLATFORM_WIDTH
+        y += PLATFORM_HEIGHT
+        x = 0
+    m_l_w = max([len(i) for i in level["map"]])
+    total_level_width = m_l_w * PLATFORM_WIDTH
+    total_level_height = len(level["map"]) * PLATFORM_HEIGHT
+    camera = Camera(camera_configure, total_level_width, total_level_height)
+    return end_rect, player, camera
 
 
 class Button(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, buttonText='Button', onclickFunction=None, but=1, image=None,
+    def __init__(self, x, y, width, height, buttonText='Button', onclickFunction=None, image=None,
                  colorText: [int, int, int, int] = [255, 255, 255, 10], image_hover=None):
         pygame.sprite.Sprite.__init__(self)
         if image:
             self.image = pygame.image.load(image)
             self.image = pygame.transform.scale(self.image, [width, height])
+        else:
+            self.image = None
         if image_hover:
             self.image_hover = pygame.image.load(image_hover)
             self.image_hover = pygame.transform.scale(self.image_hover, [width, height])
-        self.but = but
+        else:
+            self.image_hover = None
         self.x = x
         self.y = y
         self.width = width
@@ -53,6 +119,7 @@ class Button(pygame.sprite.Sprite):
         self.fillColors = {'normal': (18, 229, 64), 'hover': (44, 184, 74), 'pressed': '#333333', }
         self.buttonSurface = pygame.Surface((self.width, self.height))
         self.buttonRect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.buttonRect.center = (self.x, self.y)
         self.main_front = pygame.font.Font(None, 32)
         self.buttonSurface = pygame.Surface((self.width, self.height))
         self.buttonSurf = self.main_front.render(self.buttonText, True, self.colorText)
@@ -65,13 +132,13 @@ class Button(pygame.sprite.Sprite):
         if self.buttonRect.collidepoint(pygame.mouse.get_pos()):
             self.buttonSurface.fill(self.fillColors['hover'])
             self.buttonSurf = self.main_front.render(self.buttonText, True, self.colorText)
-            # self.image.fill((255, 255, 255, 100), special_flags=pygame.BLEND_RGBA_MULT)
             if self.image_hover:
                 screen.blit(self.image_hover, self.buttonRect)
             if pygame.mouse.get_pressed(num_buttons=3)[0]:
                 self.buttonSurface.fill(self.fillColors['pressed'])
                 if not self.alreadyPressed:
-                    self.onclickFunction()
+                    if self.onclickFunction:
+                        self.onclickFunction()
                     self.alreadyPressed = True
             else:
                 self.alreadyPressed = False
@@ -84,40 +151,100 @@ class Button(pygame.sprite.Sprite):
             screen.blit(self.buttonSurface, self.buttonRect)
 
 
-class Game:
-    def __init__(self):
-        global screen
-        pygame.init()
-        pygame.display.set_caption("Simple Game")
-        screen = pygame.display.set_mode((500, 500))
-        self.clock = pygame.time.Clock()
-        self.playerGroup = pygame.sprite.Group()
-        # self.playerGroup.add(Player(image="goldappl.png", size=[100, 100]))
-        self.buttonGroup = pygame.sprite.Group()
-        self.buttonGroup.add(Button(100, 100, 50, 50, image="goldappl.png", onclickFunction=lambda: print("sdfd"),image_hover = "i.webp"))
-        self.running = True
-        self.clock.tick(60)
-
-    def run(self):
-        while self.running:
-            self.clock.tick(60)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                    pygame.quit()
-                    sys.exit()
-                    pygame.display.quit()
-            self.update()
-
-    def update(self):
-        # self.playerGroup.sprites()[0].move((100, 100))
+def start_menu():
+    btn_start = Button(WIN_WIDTH // 2, (WIN_HEIGHT // 2) - 60, 200, 50, image="button.png",
+                       image_hover="buttonpress.png", buttonText="Начать игру", colorText=(0, 0, 0, 10))
+    btn_exit = Button(WIN_WIDTH // 2, WIN_HEIGHT // 2, 200, 50, image="button.png",
+                      image_hover="buttonpress.png", onclickFunction=terminate, buttonText="Выйти",
+                      colorText=(0, 0, 0, 10))
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+        if btn_start.buttonRect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+            return
         screen.fill((0, 0, 0))
-        self.playerGroup.update()
-        self.buttonGroup.update()
-        # self.playerGroup.draw(screen)
+        btn_start.update()
+        btn_exit.update()
         pygame.display.update()
 
 
-if __name__ == "__main__":
-    game = Game()
-    game.run()
+def dead_menu():
+    btn_start = Button(WIN_WIDTH // 2, (WIN_HEIGHT // 2) - 60, 200, 50, image="button.png",
+                       image_hover="buttonpress.png", buttonText="Начать заново", colorText=(0, 0, 0, 10))
+    btn_exit = Button(WIN_WIDTH // 2, WIN_HEIGHT // 2, 200, 50, image="button.png",
+                      image_hover="buttonpress.png", onclickFunction=terminate, buttonText="Выйти",
+                      colorText=(0, 0, 0, 10))
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+        if btn_start.buttonRect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+            all_sprites.empty()
+            monsters.empty()
+            bullets.empty()
+            level = levels.levels[levelId]
+            end_rect, player, camera = generate_level(level)
+            return end_rect, player, camera
+        screen.fill((0, 0, 0))
+        btn_start.update()
+        btn_exit.update()
+        pygame.display.update()
+
+
+pygame.init()
+pygame.display.set_caption("GAME")
+screen = pygame.display.set_mode(DISPLAY)
+clock = pygame.time.Clock()
+left = right = False
+up = False
+levelId = 0
+level = levels.levels[levelId]
+end_rect, player, camera = generate_level(level)
+start_menu()
+while True:
+    clock.tick(60)
+    for e in pygame.event.get():
+        if e.type == pygame.QUIT:
+            terminate()
+        if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
+            terminate()
+        if e.type == pygame.KEYDOWN and e.key == pygame.K_UP:
+            up = True
+        if e.type == pygame.KEYDOWN and e.key == pygame.K_LEFT:
+            left = True
+        if e.type == pygame.KEYDOWN and e.key == pygame.K_RIGHT:
+            right = True
+        if e.type == pygame.KEYDOWN and e.key == pygame.K_a:
+            player.attach()
+        if e.type == pygame.KEYUP and e.key == pygame.K_UP:
+            up = False
+        if e.type == pygame.KEYUP and e.key == pygame.K_RIGHT:
+            right = False
+        if e.type == pygame.KEYUP and e.key == pygame.K_LEFT:
+            left = False
+    pygame.sprite.groupcollide(monsters, bullets, True, True)
+    if player.rect.colliderect(end_rect.rect):
+        all_sprites.empty()
+        monsters.empty()
+        bullets.empty()
+        walls.empty()
+        levelId = level["next_level_id"]
+        level = levels.levels[levelId]
+        end_rect, player, camera = generate_level(level)
+
+    screen.fill((0, 0, 0))
+    if pygame.sprite.spritecollideany(player, monsters):
+        left = right = up = False
+        end_rect, player, camera = dead_menu()
+    camera.update(player)
+    player.move(left, right, up)
+    bullets.update()
+    for i in all_sprites:
+        try:
+            screen.blit(i.image, camera.apply(i))
+        except Exception:
+            pygame.draw.rect(screen, i.color, camera.apply(i))
+    monsters.update(screen)
+    pygame.display.flip()
+    clock.tick(fps)

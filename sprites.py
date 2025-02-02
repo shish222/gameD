@@ -1,8 +1,6 @@
 import os
 
 import pygame
-import pprint
-
 from config import *
 
 all_sprites = pygame.sprite.Group()
@@ -51,11 +49,6 @@ class Bullet(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         bullets.add(self)
         all_sprites.add(self)
-        # if velocity < 0:
-        #     self.image = load_image(image, colorkey=-1)
-        # else:
-        #     self.image = pygame.transform.flip(load_image(image, colorkey=-1), 1, 0)
-        #     self.image.set_colorkey(self.image.get_at((0, 0)))
         self.rect = pygame.Rect(pos[0], pos[1], PLATFORM_WIDTH / 2, PLATFORM_HEIGHT / 2)
         self.velocity = velocity
 
@@ -69,7 +62,6 @@ class Bullet(pygame.sprite.Sprite):
             self.image.set_colorkey(self.image.get_at((0, 0)))
         if pygame.sprite.spritecollide(self, walls, dokill=False):
             self.kill()
-        # screen.blit(self.image, self.rect)
 
 
 class Player(pygame.sprite.Sprite):
@@ -80,8 +72,8 @@ class Player(pygame.sprite.Sprite):
         self.image = self.animation[self.count]
         self.maxYVal = 60
         self.GRAVITY = 2
-        self.JUMP_POWER = 6
-        self.max_jump = 30
+        self.JUMP_POWER = 5
+        self.max_jump = 15
         self.is_jumping = False
         self.xvel = 0
         self.yvel = 0
@@ -102,7 +94,6 @@ class Player(pygame.sprite.Sprite):
             self.count = 0
         if up:
             if self.onGround:
-                # self.yvel = -self.max_jump
                 self.is_jumping = True
             else:
                 self.animation = jumping_animation
@@ -150,12 +141,25 @@ class Player(pygame.sprite.Sprite):
                     self.yvel = 0
                     self.is_jumping = False
 
-    def kill(self):
-        pass
-
     def attach(self):
         if bullets.__len__() < 3:
             if self.direction:
                 Bullet((self.rect.left, self.rect.top), self.direction * 10)
             else:
                 Bullet((self.rect.right, self.rect.top), self.direction * 10)
+
+
+class Wall(pygame.sprite.Sprite):
+
+    def __init__(self, pos):
+        pygame.sprite.Sprite.__init__(self)
+        walls.add(self)
+        self.color = (255, 255, 255)
+        self.rect = pygame.Rect(pos[0], pos[1], PLATFORM_WIDTH, PLATFORM_HEIGHT)
+
+
+class EndPoint(pygame.sprite.Sprite):
+    def __init__(self, pos):
+        pygame.sprite.Sprite.__init__(self)
+        self.color = (255, 0, 0)
+        self.rect = pygame.Rect(pos[0], pos[1], 16, 16)
