@@ -10,7 +10,7 @@ def terminate():
 
 
 class Monster(pygame.sprite.Sprite):
-    def __init__(self, x, y, speed=2, _len=0, image="Slime Sprites.png", colorkey=None):
+    def __init__(self, x, y, speed=2, _len=0, image="data/Slime Sprites.png", colorkey=None):
         pygame.sprite.Sprite.__init__(self)
         self.animation = cut_sheet(load_image(image, scale=False, colorkey=-1), 4, 3)[0][:2]
         self.speed = speed
@@ -152,10 +152,10 @@ class Button(pygame.sprite.Sprite):
 
 
 def start_menu():
-    btn_start = Button(WIN_WIDTH // 2, (WIN_HEIGHT // 2) - 60, 200, 50, image="button.png",
-                       image_hover="buttonpress.png", buttonText="Начать игру", colorText=(0, 0, 0, 10))
-    btn_exit = Button(WIN_WIDTH // 2, WIN_HEIGHT // 2, 200, 50, image="button.png",
-                      image_hover="buttonpress.png", onclickFunction=terminate, buttonText="Выйти",
+    btn_start = Button(WIN_WIDTH // 2, (WIN_HEIGHT // 2) - 60, 200, 50, image="data/button.png",
+                       image_hover="data/buttonpress.png", buttonText="Начать игру", colorText=(0, 0, 0, 10))
+    btn_exit = Button(WIN_WIDTH // 2, WIN_HEIGHT // 2, 200, 50, image="data/button.png",
+                      image_hover="data/buttonpress.png", onclickFunction=terminate, buttonText="Выйти",
                       colorText=(0, 0, 0, 10))
     while True:
         for event in pygame.event.get():
@@ -170,10 +170,10 @@ def start_menu():
 
 
 def dead_menu():
-    btn_start = Button(WIN_WIDTH // 2, (WIN_HEIGHT // 2) - 60, 200, 50, image="button.png",
-                       image_hover="buttonpress.png", buttonText="Начать заново", colorText=(0, 0, 0, 10))
-    btn_exit = Button(WIN_WIDTH // 2, WIN_HEIGHT // 2, 200, 50, image="button.png",
-                      image_hover="buttonpress.png", onclickFunction=terminate, buttonText="Выйти",
+    btn_start = Button(WIN_WIDTH // 2, (WIN_HEIGHT // 2) - 60, 200, 50, image="data/button.png",
+                       image_hover="data/buttonpress.png", buttonText="Начать заново", colorText=(0, 0, 0, 10))
+    btn_exit = Button(WIN_WIDTH // 2, WIN_HEIGHT // 2, 200, 50, image="data/button.png",
+                      image_hover="data/buttonpress.png", onclickFunction=terminate, buttonText="Выйти",
                       colorText=(0, 0, 0, 10))
     while True:
         for event in pygame.event.get():

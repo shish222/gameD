@@ -8,7 +8,7 @@ levels = [{"map": [
     , "W                    WWW                                               W      W"
     , "W  P       W    1    W      2                       2                  W     EW"
     , "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"],
-    "monsters": {"1": {"len": 4, "image": "Slime Sprites.png"}, "2": {"len": 10, "image": "Slime Sprites.png"}},
+    "monsters": {"1": {"len": 4, "image": "data/Slime Sprites.png"}, "2": {"len": 10, "image": "data/Slime Sprites.png"}},
     "next_level_id": 1},
     {"map": ["WWWWWWWWWWWWWW"
         , "W            W"
@@ -34,7 +34,7 @@ levels = [{"map": [
         , "W      W     W"
         , "WP    W      W"
         , "WWWWWWWWWWWWWW"],
-     "monsters": {"1": {"len": 4, "image": "Slime Sprites.png"}, "2": {"len": 10, "image": "Slime Sprites.png"}},
+     "monsters": {"1": {"len": 4, "image": "data/Slime Sprites.png"}, "2": {"len": 10, "image": "data/Slime Sprites.png"}},
      "next_level_id": 0},
     {"map": ["WWWWWWWWWWWWWWWWWWWW",
              "W          1       W",
@@ -51,7 +51,7 @@ levels = [{"map": [
              "W W   WWWW   WWW   W",
              "W     W    E   W             2         ",
              "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW", ],
-     "monsters": {"1": {"len": 10, "image": "Slime Sprites.png"}, "2": {"len": 2, "image": "Slime Sprites.png"}},
+     "monsters": {"1": {"len": 10, "image": "data/Slime Sprites.png"}, "2": {"len": 2, "image": "Sdata/lime Sprites.png"}},
      "next_level_id": 1},
     {"map": ["WWWWWWWWWWWWWWWWWWWW",
              "W          1       W",
@@ -68,6 +68,6 @@ levels = [{"map": [
              "W W   WWWW   WWW   W",
              "W     W    E   W             2         ",
              "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW", ],
-     "monsters": {"1": {"len": 10, "image": "Slime Sprites.png"}, "2": {"len": 2, "image": "Slime Sprites.png"}},
+     "monsters": {"1": {"len": 10, "image": "data/Slime Sprites.png"}, "2": {"len": 2, "image": "data/Slime Sprites.png"}},
      "next_level_id": 0}
 ]

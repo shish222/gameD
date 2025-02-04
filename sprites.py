@@ -36,14 +36,14 @@ def load_image(name, colorkey=None, scale=True):
     return image
 
 
-idle_animation = [load_image(f"Little Mage/Idle/{i}", colorkey=-1) for i in os.listdir("Little Mage/Idle")]
-run_animation = [load_image(f"Little Mage/Run/{i}", colorkey=-1) for i in os.listdir("Little Mage/Run")]
-jumping_animation = [load_image(f"Little Mage/Rising - Jumping/{i}", colorkey=-1) for i in
-                     os.listdir("Little Mage/Rising - Jumping")]
+idle_animation = [load_image(f"data/Little Mage/Idle/{i}", colorkey=-1) for i in os.listdir("data/Little Mage/Idle")]
+run_animation = [load_image(f"data/Little Mage/Run/{i}", colorkey=-1) for i in os.listdir("data/Little Mage/Run")]
+jumping_animation = [load_image(f"data/Little Mage/Rising - Jumping/{i}", colorkey=-1) for i in
+                     os.listdir("data/Little Mage/Rising - Jumping")]
 
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, pos, velocity, image="Retro Impact Effect Pack 5 A.png"):
+    def __init__(self, pos, velocity, image="data/Retro Impact Effect Pack 5 A.png"):
         self.animation = cut_sheet(load_image(image, scale=False), 9, 30)[8]
         self.count = 0
         pygame.sprite.Sprite.__init__(self)
